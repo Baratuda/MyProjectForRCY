@@ -374,3 +374,30 @@ a.disabled {
 #table tbody tr:nth-child(even){
 	background: #757575;
 }
+
+.tooltip {
+   position: relative;
+   display: inline-block;
+ }
+ 
+ .tooltip .tooltiptext {
+   visibility: hidden;
+   width: auto;
+   background-color: black;
+   color: #fff;
+   text-align: center;
+   border-radius: 6px;
+   padding: 10px ;
+   font-size: 18px;
+ 
+   /* Разместите всплывающую подсказку */
+   position: absolute;
+   z-index: 1;
+   bottom: 100%;
+   left: 60%;
+   margin-left: -60px;
+ }
+ 
+ .tooltip:hover .tooltiptext {
+   visibility: visible;
+ }

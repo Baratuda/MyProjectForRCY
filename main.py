@@ -11,6 +11,7 @@ db_session = scoped_session(sessionmaker(bind=engine))
 app = Flask(__name__) 
 app.add_template_filter(dificult_length_calculator)
 app.add_template_filter(sort_firedepartments)
+
 app.add_template_filter(sort_number_of_firetrukset)
 app.add_template_filter(noCombatTruksmarker)
 
@@ -90,7 +91,9 @@ def all():
                           .order_by(FireDepartment.isMain)\
                           .all()
         return render_template('all.html', results = get_firetruks(all, all_fireTruks), main_fireDepartment=main_fireDepartment)     
-    
+    else:
+        return render_template('main.html')
+
 
 if __name__ == '__main__':
     app.run()

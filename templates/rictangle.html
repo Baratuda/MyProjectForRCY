@@ -56,11 +56,20 @@
                     {% set len3 = len2 - 1 %}     
                     {% if style == 'green' %} 
                         <td  rowspan="{{len3}}" style="width: 10%;border: 1px solid #000000; " bgcolor="green">
-                            <img src="/static/images/free-icon-correct-4436481.png" height="60" width="60">
+                            <div class="tooltip">
+                                <img src="/static/images/free-icon-correct-4436481.png" height="60" width="60">
+                                <span class="tooltiptext">В подразделении</span>
+                            </div>
                         </td>
                     {% else %}
+                    
                     {% set path =  notСombatVehicles[i.licensePlate][1]|lower|replace(" ", "") %}     
-                        <td rowspan="{{len3}}" style="width: 10%;border: 1px solid #000000;"><img src="/static/images/{{path}}.png" height="60" width="60"></td>      
+                        <td rowspan="{{len3}}" style="width: 10%;border: 1px solid #000000;">
+                            <div class="tooltip">
+                                <img src="/static/images/{{path}}.png" height="60" width="60">
+                                <span class="tooltiptext">{{notСombatVehicles[i.licensePlate][1]}}</span>
+                            </div>
+                        </td>      
                     {% endif %} 
                     <td rowspan="{{len3}}" class="{{style}}" style="width: 6%;border: 1px solid #000000;"> 
                         <a href="/?licensePlate={{i.licensePlate}}&rictangle={{rictangle}}" class="btn btn-white btn-animate">
