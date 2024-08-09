@@ -14,8 +14,15 @@
         <button class="search-icon"><span></span></button>
     </div>
   </form>
+  <div style="width: auto; border: 3px solid rgb(0, 0, 0);  line-height: 2px;">
+     <p style="margin-left: 5px;"><b>Ответственный по гарнизону:</b> Бертош Андрей Валерьевич</p>
+     <p style="margin-left: 5px;"><b>Главный оперативный дежурный:</b> Король Иван Петрович</p>
+     <p style="margin-left: 5px;"><b>Помошник главного оперативного дежурного:</b> Ваинов Роман Петрович</p>
+     <p style="margin-left: 5px;"><b>Заместитель начальника штаба:</b> Качанов Олег Петрович</p>    
+  </div>
 </div>
-  
+
+
 
   
   {% block content %}
@@ -23,6 +30,7 @@
   {% endblock content %}
   
   {% if firefighters %}
+    {% set sorted_list = firefighters|sort_firefighters %}
     <div class="popup-fade">
       <div class="popup">
         <a class="popup-close" href="#">
@@ -38,12 +46,12 @@
                 </tr>
             </thead>
             <tbody>
-                {% for i in firefighters %}
+                {% for i in sorted_list %}
                     <tr>
-                        <td>{{i.name}}</td>
-                        <td>{{i.post}}</td>
-                        <td>{{i.rank}}</td>
-                        <td>{{i.phoneNumber}}</td>
+                      <td style="background-color: rgb(207, 207, 207);">{{ i.name }}</td>
+                      <td style="background-color: rgb(184, 183, 183);">{{i.post}}</td>
+                      <td style="background-color: rgb(158, 158, 158);">{{i.rank}} в/с</td>
+                      <td style="background-color: rgb(139, 139, 139);">{{i.phoneNumber}}</td>
                     </tr>
                 {% endfor %}
             </tbody>

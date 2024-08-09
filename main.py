@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 from sqlalchemy.orm import scoped_session, sessionmaker
 from config import engine
-from filters.my_custom_filters import dificult_length_calculator, noCombatTruksmarker, sort_firedepartments, sort_number_of_firetrukset
+from filters.my_custom_filters import dificult_length_calculator, noCombatTruksmarker, sort_firedepartments, sort_firefighters, sort_number_of_firetrukset
 from helpMethods import get_firetruks, getNotСombatVehicles, rictangles, test
 from models import DistrictDepartment, FireTruks, FireDepartment, FireFighters
 from sqlalchemy import or_, and_
@@ -14,11 +14,13 @@ app.add_template_filter(sort_firedepartments)
 
 app.add_template_filter(sort_number_of_firetrukset)
 app.add_template_filter(noCombatTruksmarker)
+app.add_template_filter(sort_firefighters)
 
 @app.route("/", methods=['GET','POST'])
 def all():
     licensePlate = request.args.get('licensePlate')
     ric = request.args.get('rictangle')
+    type = request.args.get('type')
     main_fireDepartment = [i[0] for i in db_session.query(FireDepartment.fireDepartmentNumber).filter(FireDepartment.isMain == True).all()]
     if request.method == 'POST':   
         query = request.form['query']
@@ -34,9 +36,30 @@ def all():
                           .order_by(FireDepartment.isMain)\
                           .all()
             return render_template('responsebles.html', results=get_firetruks( all_responsibles), main_fireDepartment=main_fireDepartment)
+        if query.lower() == 'штаб':
+            headquarters = db_session.query(FireTruks)\
+                          .filter(FireTruks.fireDepartment_id=='0').all()
+            return render_template('headquarters.html', results=headquarters)
+        if query.lower() == 'цоу':
+            all = db_session.query(FireFighters).filter(FireFighters.fireDepartment_id=='0').order_by(FireFighters.isOfficer.desc()).all()
+            headquarters = []
+            cou = []
+            main_person = ''
+            main_assistant = '' 
+            main_headquarter = ''
+            for i in all:
+                if i.post.startswith("Диспетчер"): cou.append(i)
+                elif i.post.startswith("Главный"): main_person=i
+                elif i.post.startswith("Помощник"): main_assistant=i    
+                elif i.post.startswith("Заместитель"): main_headquarter=i   
+                else: headquarters.append(i)
+            cou.insert(0,main_assistant)    
+            cou.insert(0,main_person)
+            headquarters.insert(0,main_headquarter)
+            return render_template('cou.html', results=cou, results2=headquarters)
         if query.lower() == 'диспетчера'or query.lower() == 'дис':
             all_dispatchers = db_session.query(FireFighters, DistrictDepartment)\
-                          .filter(or_(FireFighters.post == "радиотелефонист", FireFighters.post == "Диспетчер") )\
+                          .filter(or_(FireFighters.post == "радиотелефонист", FireFighters.post.startswith("Диспетчер")) )\
                           .join(FireDepartment, FireFighters.fireDepartment_id==FireDepartment.fireDepartmentNumber)\
                           .join(DistrictDepartment, FireDepartment.districtDepartment_id==DistrictDepartment.id)\
                           .order_by(FireDepartment.isMain)\
@@ -67,14 +90,17 @@ def all():
                           .all()
             return render_template('reserve.html', results=get_firetruks(all_reserved_firetruks), main_fireDepartment=main_fireDepartment) 
     if licensePlate:
-        firefighters = db_session.query(FireFighters).filter(FireFighters.fireTruk_id==licensePlate).all()
+        firefighters = db_session.query(FireFighters).filter(FireFighters.fireTruk_id==licensePlate).order_by(FireFighters.post).all()
         if not firefighters:
            licensePlate = db_session.query(FireTruks.main_truk_id).filter(FireTruks.licensePlate == licensePlate)
-           firefighters = db_session.query(FireFighters).filter(FireFighters.fireTruk_id==licensePlate).all()
+           firefighters = db_session.query(FireFighters).filter(FireFighters.fireTruk_id==licensePlate).order_by(FireFighters.post).all()
         if ric:
             all_fire_department = rictangles[ric]
             all_firetruks = db_session.query(FireTruks).filter(and_(FireTruks.fireDepartment_id.in_(all_fire_department),FireTruks.status == 'COM')).all()
             return render_template('rictangle.html', results=test(all_firetruks, all_fire_department), rictangle=ric, firefighters=firefighters, notСombatVehicles=getNotСombatVehicles(), main_fireDepartment=main_fireDepartment)    
+        elif type:
+            fireTruks = db_session.query(FireTruks).filter(FireTruks.fireDepartment_id=='0').all()
+            return render_template('headquarters.html', results=fireTruks, firefighters=firefighters)
         else:
             all_fireTruks = db_session.query(FireTruks).all()
             all = db_session.query(FireTruks, DistrictDepartment)\
@@ -83,6 +109,7 @@ def all():
                           .order_by(FireDepartment.isMain)\
                           .all()  
             return render_template('all.html', results=get_firetruks(all, all_fireTruks), firefighters=firefighters, main_fireDepartment=main_fireDepartment)
+
     if request.method == 'GET' or query=='' or query.lower() == 'все':
         all_fireTruks = db_session.query(FireTruks).all()
         all = db_session.query(FireTruks, DistrictDepartment)\
