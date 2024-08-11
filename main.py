@@ -59,7 +59,7 @@ def all():
             return render_template('cou.html', results=cou, results2=headquarters)
         if query.lower() == 'диспетчера'or query.lower() == 'дис':
             all_dispatchers = db_session.query(FireFighters, DistrictDepartment)\
-                          .filter(or_(FireFighters.post == "радиотелефонист", FireFighters.post.startswith("Диспетчер")) )\
+                          .filter(or_(FireFighters.post == "радиотелефонист", FireFighters.post=="Диспетчер"))\
                           .join(FireDepartment, FireFighters.fireDepartment_id==FireDepartment.fireDepartmentNumber)\
                           .join(DistrictDepartment, FireDepartment.districtDepartment_id==DistrictDepartment.id)\
                           .order_by(FireDepartment.isMain)\
